@@ -1,5 +1,5 @@
-GEMINI_API_KEY=your_gemini_api_key_here
-TELEGRAM_BOT_TOKEN=your_telegram_bot_token_here
+GEMINI_API_KEY=
+TELEGRAM_BOT_TOKEN=8554822110:AAEcIh-q0_W85jk67Wl7VwjPvpbFBew7tbc
 CHANNEL_ID=@daily_by_jarvis
 POST_TIME=09:00
 PORT=3000
