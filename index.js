@@ -12,7 +12,6 @@ app.use(express.static('public'));
 // Init Gemini
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-lite' });
-
 // Init Telegram Bot
 const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, { polling: false });
 const CHANNEL_ID = process.env.CHANNEL_ID || '@daily_by_jarvis';
