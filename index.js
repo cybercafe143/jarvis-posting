@@ -5,6 +5,7 @@ const Groq = require('groq-sdk');
 const https = require('https');
 const http = require('http');
 const path = require('path');
+const { addWatermark } = require('./watermark');
 require('dotenv').config();
 
 const app = express();
@@ -99,12 +100,14 @@ Sirf post content do, kuch extra mat likho.`
 async function sendToTelegram(content, imageUrl) {
   console.log('Downloading image from:', imageUrl);
 
-  // Try: Download and send as buffer
+  // Try: Download, add watermark, and send
   try {
     const imageBuffer = await downloadImage(imageUrl);
     console.log('Downloaded! Size:', imageBuffer.length, 'bytes');
-    const message = await bot.sendPhoto(CHANNEL_ID, imageBuffer, { caption: content });
-    console.log('Photo + caption sent!');
+    const watermarkedBuffer = await addWatermark(imageBuffer);
+    console.log('Watermark added!');
+    const message = await bot.sendPhoto(CHANNEL_ID, watermarkedBuffer, { caption: content });
+    console.log('Photo + watermark + caption sent!');
     return { success: true, messageId: message.message_id };
   } catch (err) {
     console.log('Photo failed:', err.message);
