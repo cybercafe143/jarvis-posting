@@ -145,21 +145,21 @@ Write a Telegram post with this EXACT FORMAT:
 
 [One powerful hook line in English that stops the reader]
 
-[2-3 paragraphs — mix of English and Hindi — deep, dark, factual. Cover the psychology behind human behavior, manipulation tactics, or shocking tech facts. Be specific, not vague.]
+[2-3 paragraphs — ENGLISH— deep, dark, factual. Cover the psychology behind human behavior, manipulation tactics, or shocking tech facts. Be specific, not vague.]
 
 📌 Facts:
 • [Shocking specific fact with number/statistic]
 • [Another dark or surprising fact]
 • [Third mind-blowing fact]
 
-[One line question in Hindi that makes reader question reality]
+
 
 #DarkPsychology #AIDaily #MindControl #TechFacts #HumanMind
 
 @daily_by_jarvis
 
 Rules:
-- More English, less Hindi (70% English, 30% Hindi)
+- More English 
 - Facts must be real and specific with numbers
 - Dark psychology angle — manipulation, cognitive biases, social engineering
 - No fluff, no generic content
