@@ -13,7 +13,8 @@
     "express": "^4.18.2",
     "groq-sdk": "^1.2.1",
     "node-cron": "^3.0.3",
-    "node-telegram-bot-api": "^0.66.0"
+    "node-telegram-bot-api": "^0.66.0",
+    "sharp": "^0.35.1"
   },
   "devDependencies": {
     "nodemon": "^3.1.0"
