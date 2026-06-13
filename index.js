@@ -42,23 +42,27 @@ let scheduledJob = null;
 
 // Generate post content using Gemini
 async function generatePost(topic) {
-  const prompt = `Tu ek AI content creator hai "Ai Daily By Jarvis" Telegram channel ke liye.
-  
+  const completion = await groq.chat.completions.create({
+    model: 'llama-3.3-70b-versatile',
+    messages: [{
+      role: 'user',
+      content: `Tu ek AI content creator hai "Ai Daily By Jarvis" Telegram channel ke liye.
+      
 Topic: ${topic}
 
 Ek engaging Telegram post likho jo:
 - Hinglish (Hindi + English mix) mein ho
-- 150-200 words ka ho
+- 150-200 words ka ho  
 - Catchy emoji use kare
-- Interesting facts ya story ho
-- End mein ek thought-provoking question ho readers ke liye
-- Hashtags include kare: #AIDaily #AINews #Tech #Futurism #Hinglish
-- Channel mention kare: @daily_by_jarvis
+- End mein thought-provoking question ho
+- Hashtags: #AIDaily #AINews #Tech #Futurism #Hinglish
+- Channel mention: @daily_by_jarvis
 
-Sirf post content do, kuch extra mat likho.`;
-
-  const result = await model.generateContent(prompt);
-  return result.response.text();
+Sirf post content do.`
+    }],
+    max_tokens: 500,
+  });
+  return completion.choices[0].message.content;
 }
 
 // Send post to Telegram
