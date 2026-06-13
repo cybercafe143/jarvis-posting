@@ -18,26 +18,26 @@ const CHANNEL_ID = process.env.CHANNEL_ID;
 
 // Topic categories — AI khud fresh topic generate karega
 const topicCategories = [
-  'dark psychology aur manipulation tactics jo log daily life mein use karte hain',
-  'quantum computing aur uska future impact',
-  'neuroscience - human brain ke shocking secrets',
-  'AI aur consciousness - kya machines soch sakti hain',
-  'deepfake technology - reality vs fake ka khel',
-  'dark web aur internet ka hidden side',
-  'cognitive biases - hamare brain ki galat soch',
-  'surveillance capitalism - companies kaise humein track karti hain',
-  'transhumanism - human body ka future upgrade',
-  'algorithmic bias - AI kaise discriminate karta hai',
-  'social engineering - hackers log ko kaise fool karte hain',
-  'memory aur learning - brain science ke secrets',
-  'AI aur war - future warfare',
-  'digital addiction - tech companies ka psychological trap',
-  'nanotechnology - invisible machines ka future',
-  'black box AI - jo khud nahi jaanta kya kar raha hai',
-  'biometric surveillance - face recognition ka dark side',
-  'emotional AI - machines jo feelings samajhti hain',
-  'misinformation aur propaganda - fake news ka science',
-  'human cloning aur genetic engineering ethics',
+  'dark psychology manipulation tactics used in everyday life and relationships',
+  'how big tech companies psychologically exploit users for profit',
+  'neuroscience secrets — how human memory and decision making can be hacked',
+  'social engineering and how hackers manipulate human psychology',
+  'cognitive biases that make humans easy to control and deceive',
+  'surveillance capitalism — how every click, emotion and thought is tracked',
+  'dark patterns in UI/UX — how apps are designed to addict you',
+  'emotional manipulation tactics used by narcissists and psychopaths',
+  'how propaganda and misinformation rewire the human brain',
+  'AI detecting emotions, lies and mental states — who has access',
+  'the psychology of cults and mass manipulation',
+  'dopamine hijacking — how social media controls your brain chemistry',
+  'gaslighting at scale — how institutions and media manipulate reality',
+  'body language and microexpressions — reading hidden signals',
+  'the dark psychology behind advertising and consumer manipulation',
+  'how authoritarian governments use AI for thought control',
+  'OSINT and digital footprint — how anyone can be tracked',
+  'psychology of persuasion — Cialdini principles used in dark ways',
+  'trauma bonding and psychological chains that keep people trapped',
+  'transhumanism and neuralink — who controls the upgraded human',
 ];
 
 // Unsplash tech images pool
@@ -94,18 +94,17 @@ async function generateFreshTopics() {
     model: 'llama-3.3-70b-versatile',
     messages: [{
       role: 'user',
-      content: `Tu ek expert content strategist hai jo "Ai Daily By Jarvis" Telegram channel ke liye topics banata hai.
+      content: `You are a content strategist for a dark psychology & tech Telegram channel.
 
-Category focus: ${randomCategory}
+Category: ${randomCategory}
 
-5 unique, specific, deep aur interesting post topics generate kar jo:
-- Factual aur mind-blowing ho
-- Psychology, technology, neuroscience, AI ke intersection pe ho
-- Common knowledge nahi — surprising aur lesser-known facts pe based ho
-- Hinglish audience ke liye relatable ho
-- Clickbait nahi — genuinely informative aur thought-provoking ho
+Generate 5 highly specific, deep, and provocative post topics. Each topic should:
+- Be about human manipulation, dark psychology, cognitive exploitation, or forbidden tech knowledge
+- Have a specific angle — not generic (e.g. not "AI is changing jobs" but "How AI detects lies better than humans — and who's using it against you")
+- Feel like insider/forbidden knowledge
+- Be fascinating to 18-30 year old Indians interested in psychology + tech
 
-Sirf 5 topics list karo, numbered 1-5, ek line each. Kuch extra mat likho.`
+List only 5 topics, numbered 1-5, one line each. Nothing else.`
     }],
     max_tokens: 300,
   });
@@ -138,21 +137,34 @@ async function generatePost(topic) {
     model: 'llama-3.3-70b-versatile',
     messages: [{
       role: 'user',
-      content: `Tu ek expert AI content creator hai "Ai Daily By Jarvis" Telegram channel ke liye.
+      content: `You are a viral content creator for "Ai Daily By Jarvis" Telegram channel — focused on deep psychology, human manipulation, dark tech, and mind-blowing facts.
 
 Topic: ${topic}
 
-Ek viral Telegram post likho jo:
-- Hinglish (Hindi + English mix) mein ho — natural flow, forced translation nahi
-- 180-220 words ka ho
-- Hook line se shuru ho — pehli line itni powerful ho ki log ruk jayein
-- 2-3 shocking/surprising facts include karo
-- Catchy emojis strategically use karo (har line pe nahi)
-- End mein ek aise question ke saath khatam karo jo reader ko sochne pe majboor kare
-- Hashtags: #AIDaily #Psychology #TechFacts #MindBlown #Hinglish
-- Last line: Join karo @daily_by_jarvis
+Write a Telegram post with this EXACT FORMAT:
 
-Sirf post content do.`
+[One powerful hook line in English that stops the reader]
+
+[2-3 paragraphs — mix of English and Hindi — deep, dark, factual. Cover the psychology behind human behavior, manipulation tactics, or shocking tech facts. Be specific, not vague.]
+
+📌 Facts:
+• [Shocking specific fact with number/statistic]
+• [Another dark or surprising fact]
+• [Third mind-blowing fact]
+
+[One line question in Hindi that makes reader question reality]
+
+#DarkPsychology #AIDaily #MindControl #TechFacts #HumanMind
+
+@daily_by_jarvis
+
+Rules:
+- More English, less Hindi (70% English, 30% Hindi)
+- Facts must be real and specific with numbers
+- Dark psychology angle — manipulation, cognitive biases, social engineering
+- No fluff, no generic content
+- Never start with "Aaj" or "Namaste"
+- Post should feel like forbidden knowledge`
     }],
     max_tokens: 600,
   });
