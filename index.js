@@ -11,14 +11,10 @@ const app = express();
 app.use(express.json());
 app.use(express.static('public'));
 
-// Init Groq
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
-
-// Init Telegram Bot
 const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, { polling: false });
 const CHANNEL_ID = process.env.CHANNEL_ID;
 
-// Topics rotation
 const topics = [
   'AI aur Popular Culture - movies, shows mein AI ka role',
   'AI Tools jo aaj use kar sakte ho - practical tips',
@@ -37,23 +33,22 @@ const topics = [
   'AI Ethics - sahi aur galat ka faisla kaun karega',
 ];
 
-// Image prompts for each topic
 const imagePrompts = [
-  'futuristic AI robot watching movies in cinema, neon lights, sci-fi',
-  'AI holographic tools floating in space, futuristic technology',
-  'robot and human working together in office, future workplace',
-  'AI medical robot doctor scanning patient, futuristic hospital',
-  'AI creating digital art on holographic canvas, creative technology',
-  'futuristic AI chatbot hologram assistant, neon blue glow',
-  'AI teaching students in futuristic classroom, holographic screens',
-  'self driving car on Indian highway, futuristic neon city',
-  'digital eye watching data streams, privacy concept, dark theme',
-  'neural network brain visualization, glowing connections, dark background',
-  'AI gaming character in neon virtual world, cyberpunk style',
-  'humanoid robot working in factory, industrial futuristic',
-  'AI algorithm social media network visualization, digital art',
-  'neural network brain glowing connections, blue purple neon',
-  'AI robot thinking ethics decision making, dramatic lighting',
+  'futuristic AI robot watching movies cinema neon lights sci-fi',
+  'AI holographic tools floating space futuristic technology glowing',
+  'robot and human working together office future workplace neon',
+  'AI medical robot doctor scanning patient futuristic hospital blue',
+  'AI creating digital art holographic canvas creative technology neon',
+  'futuristic AI chatbot hologram assistant neon blue glow dark',
+  'AI teaching students futuristic classroom holographic screens',
+  'self driving car highway futuristic neon city night',
+  'digital eye watching data streams privacy concept dark theme neon',
+  'neural network brain visualization glowing connections dark background',
+  'AI gaming character neon virtual world cyberpunk style',
+  'humanoid robot working factory industrial futuristic dramatic',
+  'AI algorithm social media network visualization digital art neon',
+  'neural network brain glowing connections blue purple neon dark',
+  'AI robot thinking ethics decision making dramatic lighting',
 ];
 
 let topicIndex = 0;
@@ -61,29 +56,37 @@ let postHistory = [];
 let isAutoPosting = false;
 let scheduledJob = null;
 
-// Generate image URL from Pollinations (FREE)
 function getImageUrl(prompt) {
-  const encoded = encodeURIComponent(prompt + ', high quality, dramatic lighting, 4k');
-  return `https://image.pollinations.ai/prompt/${encoded}?width=1024&height=1024&nologo=true`;
+  const encoded = encodeURIComponent(prompt + ' high quality dramatic 4k');
+  return `https://image.pollinations.ai/prompt/${encoded}?width=1024&height=1024&nologo=true&seed=${Date.now()}`;
 }
 
-// Download image as buffer
 function downloadImage(url) {
   return new Promise((resolve, reject) => {
+    const timeoutMs = 25000;
     const protocol = url.startsWith('https') ? https : http;
-    protocol.get(url, (res) => {
+    
+    const req = protocol.get(url, { timeout: timeoutMs }, (res) => {
       if (res.statusCode === 301 || res.statusCode === 302) {
         return downloadImage(res.headers.location).then(resolve).catch(reject);
+      }
+      if (res.statusCode !== 200) {
+        return reject(new Error('Status: ' + res.statusCode));
       }
       const chunks = [];
       res.on('data', chunk => chunks.push(chunk));
       res.on('end', () => resolve(Buffer.concat(chunks)));
       res.on('error', reject);
-    }).on('error', reject);
+    });
+    
+    req.on('timeout', () => {
+      req.destroy();
+      reject(new Error('Image download timeout'));
+    });
+    req.on('error', reject);
   });
 }
 
-// Generate post content using Groq
 async function generatePost(topic) {
   const completion = await groq.chat.completions.create({
     model: 'llama-3.3-70b-versatile',
@@ -108,37 +111,44 @@ Sirf post content do, kuch extra mat likho.`
   return completion.choices[0].message.content;
 }
 
-// Send post with photo to Telegram
 async function sendToTelegram(content, imagePrompt) {
+  const imageUrl = getImageUrl(imagePrompt);
+  console.log('Trying image URL:', imageUrl);
+
+  // Try 1: Download buffer and send
   try {
-    const imageUrl = getImageUrl(imagePrompt);
-    console.log('Generating image:', imageUrl);
-    
-    // Download image
     const imageBuffer = await downloadImage(imageUrl);
-    
-    // Send photo with caption
-    const message = await bot.sendPhoto(CHANNEL_ID, imageBuffer, {
-      caption: content,
-    });
+    console.log('Image downloaded, size:', imageBuffer.length);
+    const message = await bot.sendPhoto(CHANNEL_ID, imageBuffer, { caption: content });
+    console.log('SUCCESS: Photo sent with buffer!');
     return { success: true, messageId: message.message_id };
   } catch (err) {
-    console.log('Image failed, trying text only:', err.message);
-    // Fallback to text only
-    try {
-      const message = await bot.sendMessage(CHANNEL_ID, content);
-      return { success: true, messageId: message.message_id };
-    } catch (err2) {
-      return { success: false, error: err2.message };
-    }
+    console.log('Buffer method failed:', err.message);
+  }
+
+  // Try 2: Send URL directly to Telegram
+  try {
+    const message = await bot.sendPhoto(CHANNEL_ID, imageUrl, { caption: content });
+    console.log('SUCCESS: Photo sent with URL!');
+    return { success: true, messageId: message.message_id };
+  } catch (err) {
+    console.log('URL method failed:', err.message);
+  }
+
+  // Try 3: Text only
+  try {
+    const message = await bot.sendMessage(CHANNEL_ID, content);
+    console.log('Fallback: Text only sent');
+    return { success: true, messageId: message.message_id };
+  } catch (err) {
+    return { success: false, error: err.message };
   }
 }
 
-// Main post function
-async function createAndPost(topicOverride = null, promptOverride = null) {
+async function createAndPost(topicOverride = null) {
   const idx = topicIndex % topics.length;
   const topic = topicOverride || topics[idx];
-  const imagePrompt = promptOverride || imagePrompts[idx] || 'futuristic AI technology neon glow';
+  const imagePrompt = imagePrompts[idx];
   topicIndex++;
 
   const log = {
@@ -174,10 +184,7 @@ async function createAndPost(topicOverride = null, promptOverride = null) {
   return log;
 }
 
-// Routes
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
 
 app.get('/api/status', (req, res) => {
   res.json({
@@ -189,9 +196,7 @@ app.get('/api/status', (req, res) => {
   });
 });
 
-app.get('/api/history', (req, res) => {
-  res.json(postHistory);
-});
+app.get('/api/history', (req, res) => res.json(postHistory));
 
 app.post('/api/post-now', async (req, res) => {
   const { topic } = req.body;
@@ -202,36 +207,24 @@ app.post('/api/post-now', async (req, res) => {
 app.post('/api/start', (req, res) => {
   const { time } = req.body;
   const [hour, minute] = (time || '09:00').split(':');
-
   if (scheduledJob) scheduledJob.destroy();
-
   scheduledJob = cron.schedule(
     `${minute} ${hour} * * *`,
-    async () => {
-      console.log('Auto posting...');
-      await createAndPost();
-    },
+    async () => { console.log('Auto posting...'); await createAndPost(); },
     { timezone: 'Asia/Kolkata' }
   );
-
   isAutoPosting = true;
   process.env.POST_TIME = `${hour}:${minute}`;
-
   res.json({ success: true, message: `Auto posting started at ${hour}:${minute} IST daily` });
 });
 
 app.post('/api/stop', (req, res) => {
-  if (scheduledJob) {
-    scheduledJob.destroy();
-    scheduledJob = null;
-  }
+  if (scheduledJob) { scheduledJob.destroy(); scheduledJob = null; }
   isAutoPosting = false;
   res.json({ success: true, message: 'Auto posting stopped' });
 });
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`🤖 Jarvis Auto Poster running on port ${PORT}`);
-  console.log(`📱 Channel: ${CHANNEL_ID}`);
-  console.log(`🌐 Dashboard: http://localhost:${PORT}`);
+  console.log(`🤖 Jarvis running on port ${PORT} | Channel: ${CHANNEL_ID}`);
 });
